@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Lab9App</string>
+    <string name="text">Text</string>
+    <string name="face">Face</string>
+    <string name="label">Label</string>
+    <string name="previous">Previous</string>
+    <string name="camera">Camera</string>
+    <string name="next">Next</string>
+
+<!-- TODO: Add the Error String Here-->
+</resources>
