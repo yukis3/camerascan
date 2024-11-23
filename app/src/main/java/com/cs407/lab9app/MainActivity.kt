@@ -92,10 +92,63 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun onFace(view: View) {
-        // TODO: Implement the Basic Setup For Face Recognition
+        val bitmap = (imageHolder.drawable as BitmapDrawable).bitmap
+        val inputImage = InputImage.fromBitmap(bitmap, 0)
 
-        // TODO: Add Listeners for face detection process
+        val options = FaceDetectorOptions.Builder()
+            .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_ACCURATE)
+            .setLandmarkMode(FaceDetectorOptions.LANDMARK_MODE_ALL)
+            .setClassificationMode(FaceDetectorOptions.CLASSIFICATION_MODE_ALL)
+            .setContourMode(FaceDetectorOptions.CONTOUR_MODE_ALL)
+            .build()
+
+        val detector = FaceDetection.getClient(options)
+
+        detector.process(inputImage)
+            .addOnSuccessListener { faces ->
+                textOutput.text = "" // Clear previous output
+                for (face in faces) {
+                    // Bounding box
+                    val bounds = face.boundingBox
+                    toTextBox("Bounds", "Rect(${bounds.left}, ${bounds.top}, ${bounds.right}, ${bounds.bottom})")
+
+                    // Euler angles
+                    toTextBox("Angle Y", face.headEulerAngleY)
+                    toTextBox("Angle Z", face.headEulerAngleZ)
+
+                    // Smiling probability
+                    if (face.smilingProbability != null) {
+                        toTextBox("Smiling", if (face.smilingProbability!! > 0.5) "Yes!" else "No")
+                    }
+
+                    // Contour points (draw lines for left and right eyes)
+                    val leftEyeContour = face.getContour(FaceContour.LEFT_EYE)?.points
+                    val rightEyeContour = face.getContour(FaceContour.RIGHT_EYE)?.points
+                    leftEyeContour?.let { drawLine(it, Color.GREEN) }
+                    rightEyeContour?.let { drawLine(it, Color.GREEN) }
+
+                    // Nose landmark (add a clown nose image for fun)
+                    val nose = face.getLandmark(FaceLandmark.NOSE_BASE)
+                    nose?.position?.let {
+                        val noseBounds = Rect(
+                            bounds.centerX() - 50,
+                            bounds.centerY() - 50,
+                            bounds.centerX() + 50,
+                            bounds.centerY() + 50
+                        )
+                        addImage(it.x, it.y, noseBounds, face.headEulerAngleZ, "clown_nose")
+                    }
+
+                    // Add a finished marker
+                    toTextBox("Finished", "Face Recognition Complete")
+                    toTextBox("----------------", "")
+                }
+            }
+            .addOnFailureListener { e ->
+                toTextBox("Error", getString(R.string.detecting_face_error))
+            }
     }
+
 
     fun onLabel(view: View) {
         // TODO: Implement the Basic Setup For Label Recognition
