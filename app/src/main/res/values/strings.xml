@@ -8,4 +8,7 @@
     <string name="next">Next</string>
 
 <!-- TODO: Add the Error String Here-->
+    <string name="recognizing_text_error">Recognizing Text error.</string>
+    <string name="detecting_face_error">Detecting Face error.</string>
+    <string name="labeling_image_error">Labeling Image error.</string>
 </resources>

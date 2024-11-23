@@ -57,8 +57,38 @@ class MainActivity : AppCompatActivity() {
 
     fun onText(view: View) {
         // TODO: Implement the Basic Setup For Text Recognition
-
         // TODO: Add Listeners for text detection process
+        val bitmap = (imageHolder.drawable as BitmapDrawable).bitmap
+        val inputImage = InputImage.fromBitmap(bitmap, 0)
+        val options = TextRecognizerOptions.DEFAULT_OPTIONS
+        val recognizer = TextRecognition.getClient(options)
+
+        recognizer.process(inputImage)
+            .addOnSuccessListener { visionText ->
+                textOutput.text = ""
+                val recognizedText = visionText.text
+                toTextBox("Text Found", recognizedText)
+
+                for (block in visionText.textBlocks) {
+                    val boundingBox = block.boundingBox
+                    val text = block.text
+
+                    boundingBox?.let {
+                        drawBox(
+                            bounds = it,
+                            label = text,
+                            boxColor = Color.RED,
+                            textColor = Color.WHITE
+                        )
+                    }
+                }
+
+                toTextBox("Finished", "Text Recognition Complete")
+                toTextBox("----------------", "")
+            }
+            .addOnFailureListener { e ->
+                toTextBox("Error", getString(R.string.recognizing_text_error))
+            }
     }
 
     fun onFace(view: View) {
