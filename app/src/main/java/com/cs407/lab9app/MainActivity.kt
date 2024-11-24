@@ -152,12 +152,54 @@ class MainActivity : AppCompatActivity() {
 
     fun onLabel(view: View) {
         // TODO: Implement the Basic Setup For Label Recognition
-
         // TODO: Add Listeners for Label detection process
+        // Get the bitmap representation
+        val bitmap = (imageHolder.drawable as BitmapDrawable).bitmap
+        val inputImage = InputImage.fromBitmap(bitmap, 0)
+
+        // Create ImageLabelerOptions object
+        val options = ImageLabelerOptions.DEFAULT_OPTIONS
+
+        // Get an instance of ImageLabeler
+        val labeler: ImageLabeler = ImageLabeling.getClient(options)
+
+        // Start the image labeling process
+        labeler.process(inputImage)
+            .addOnSuccessListener { labels ->
+                // 清空之前的输出
+                textOutput.text = ""
+
+                // Clear previous output
+                for (label in labels) {
+                    val text = label.text
+                    val index = label.index
+                    val confidence = label.confidence
+
+                    // Use toTextBox method to display the results
+                    toTextBox("Item", text)
+                    toTextBox("Index", index)
+                    toTextBox("Confidence", confidence)
+                    toTextBox("Finished", "Object Labeling Complete")
+                    toTextBox("----------------", "")
+                }
+
+
+            }
+            .addOnFailureListener { e ->
+                // Display error message
+                toTextBox("Error", getString(R.string.labeling_image_error))
+            }
+
     }
+
 
     private fun toTextBox(label: String, value: Any) {
         textOutput.append("$label: $value\n")
+
+        // Ensure the scroll position is at the top
+        textOutput.post {
+            textOutput.scrollTo(0, 0)
+        }
     }
 
     private fun drawBox(bounds: Rect?, label: String, boxColor: Int, textColor: Int) {
